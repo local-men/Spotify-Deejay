@@ -3,20 +3,26 @@ const Boom = require('@hapi/boom');
 
 function createSession(userId, songQueue) {
     return new Promise((resolve, reject) => {
+        const sessionId = `session_${userId}`;
         getSession(userId).then((value) => {
             return reject("Session already exists")
         }).catch(() => {
-            db.ref(`active_sessions/session_${userId}`).set({
-                songQueue: songQueue,
-                users: [
-                    userId
-                ],
+            db.ref(`active_sessions/session_${userId}/users`).child(userId).set({
+                userId
             }, (error) => {
                 if (error) {
                     return reject(Boom.boomify(error))
                 } else {
                     return resolve("Session created")
                 }
+            }).then(() => {
+
+            }).then(() => {
+                songQueue.forEach((song) => {
+                    addSongToQueue(sessionId, song)
+                })
+            }).catch((error) => {
+                return reject(Boom.boomify(error))
             })
         });
     })
@@ -35,10 +41,9 @@ function getSessions() {
 function getSession(sessionId) {
     return new Promise((resolve, reject) => {
         db.ref(`active_sessions/${sessionId}`).once('value', (snapshot) => {
-            if (snapshot.val()){
+            if (snapshot.val()) {
                 return resolve(snapshot.val())
-            }
-            else {
+            } else {
                 return reject(Boom.notFound(`Could not find session ${sessionId}`))
             }
         }).catch((error) => {
@@ -47,34 +52,67 @@ function getSession(sessionId) {
     })
 }
 
-function removeSession(userId) {
+function deleteSession(sessionId) {
     return new Promise((resolve, reject) => {
-        getSession(userId).then(() => {
-            db.ref(`active_sessions/session_${userId}`)
+        getSession(sessionId).then(() => {
+            db.ref(`active_sessions/${sessionId}`)
                 .remove((error) => {
                     if (error) {
                         return reject(Boom.boomify(error, {statusCode: 500}))
                     } else {
                         return resolve("Session successfully removed")
                     }
-                }).then(() => {
-                return resolve("Session successfully removed")
-            })
+                })
         }).catch((error) => {
             return reject(error)
         })
     })
 }
 
-function removeUserFromSession(sessionId, userId) {
+function deleteSessionUser(sessionId, userId) {
     return new Promise((resolve, reject) => {
-        //TODO database query to remove user
+        getSession(sessionId).then(() => {
+            db.ref(`active_sessions/${sessionId}/users/${userId}`).once('value', (snapshot) => {
+                if (snapshot) {
+                    db.ref(`active_sessions/${sessionId}/users`).remove((error) => {
+                        if (error) {
+                            return reject(Boom.notFound(`Could not find user ${userId}`))
+                        } else {
+                            return resolve(`successfully removed ${userId} from the session`)
+                        }
+                    })
+                } else {
+                    return reject(Boom.notFound("User not in session"))
+                }
+            });
+        }).catch((error) => {
+            return reject(Boom.boomify(error))
+        });
     })
 }
 
+/*
+Adds a new song to the queue, using the URI as its key value
+ */
 function addSongToQueue(sessionId, song) {
     return new Promise((resolve, reject) => {
-        //TODO database query to add to queue
+        getSession(sessionId).then(() => {
+            db.ref(`active_sessions/${sessionId}/songQueue`).child(song.uri).set(song, (error) => {
+                if (error) {
+                    return reject(Boom.boomify(error))
+                } else {
+                    return resolve(`successfully added ${song} to the queue`)
+                }
+            })
+        }).catch((error) => {
+            return reject(Boom.boomify(error));
+        });
+    })
+}
+
+function addUserToSession(sessionId, userId) {
+    return new Promise((resolve, reject) => {
+        //TODO add a user to session
     })
 }
 
@@ -93,7 +131,8 @@ function addVoteToSong(sessionId, song) {
 
 module.exports = {
     createSession,
-    removeSession,
+    deleteSession,
+    deleteSessionUser,
     getSession,
     getSessions,
 };
