@@ -1,8 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const cors = require('cors');
 
 app.use(bodyParser.json());
+app.use(cors()); // maked this api open!
 
 app.get('/', (req, res) => {
     res.send("we are on home!")
@@ -11,7 +13,7 @@ app.get('/', (req, res) => {
 // MIDDLEWARE FOR ROUTES
 //redirects all /sessions
 const sessionRoute = require('./routes/sessionRoutes');
-app.use('/session', sessionRoute);
+app.use('/sessions', sessionRoute);
 const usersRoute = require('./routes/userRoutes');
 app.use('/users', usersRoute);
 

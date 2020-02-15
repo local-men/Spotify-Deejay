@@ -1,19 +1,19 @@
 const db = require('./firebaseDatabase').db;
+const Boom = require('@hapi/boom');
 
-// TODO make all requests return actual https errors and responses. ie 404
 function createSession(userId, songQueue) {
     return new Promise((resolve, reject) => {
-        sessionExists(userId).then((value) => {
-            return reject(value)
+        getSession(userId).then((value) => {
+            return reject("Session already exists")
         }).catch(() => {
             db.ref(`active_sessions/session_${userId}`).set({
                 songQueue: songQueue,
                 users: [
                     userId
                 ],
-            }, (Error) => {
-                if (Error) {
-                    return reject("Session not created")
+            }, (error) => {
+                if (error) {
+                    return reject(Boom.boomify(error))
                 } else {
                     return resolve("Session created")
                 }
@@ -22,13 +22,38 @@ function createSession(userId, songQueue) {
     })
 }
 
+function getSessions() {
+    return new Promise(((resolve, reject) => {
+        db.ref(`active_sessions`).once('value', (snapshot) => {
+            return (resolve(snapshot.val()));
+        }).catch((error) => {
+            return reject(Boom.boomify(error, {statusCode: 500}))
+        })
+    }))
+}
+
+function getSession(sessionId) {
+    return new Promise((resolve, reject) => {
+        db.ref(`active_sessions/${sessionId}`).once('value', (snapshot) => {
+            if (snapshot.val()){
+                return resolve(snapshot.val())
+            }
+            else {
+                return reject(Boom.notFound(`Could not find session ${sessionId}`))
+            }
+        }).catch((error) => {
+            return reject(Boom.boomify(error, {statusCode: 500}))
+        })
+    })
+}
+
 function removeSession(userId) {
     return new Promise((resolve, reject) => {
-        sessionExists(userId).then(() => {
+        getSession(userId).then(() => {
             db.ref(`active_sessions/session_${userId}`)
-                .remove((Error) => {
-                    if (Error) {
-                        return reject("Unable to remove session")
+                .remove((error) => {
+                    if (error) {
+                        return reject(Boom.boomify(error, {statusCode: 500}))
                     } else {
                         return resolve("Session successfully removed")
                     }
@@ -41,45 +66,34 @@ function removeSession(userId) {
     })
 }
 
-function sessionExists(userId) {
-    return new Promise((resolve, reject) => {
-        db.ref(`active_sessions/`).once('value', (snapshot) => {
-            if (snapshot.hasChild(`session_${userId}`)) {
-                return resolve("Session exists")
-            } else {
-                return reject("Session does not exist")
-            }
-        })
-    })
-}
-function removeUserFromSession(sessionId, userId){
+function removeUserFromSession(sessionId, userId) {
     return new Promise((resolve, reject) => {
         //TODO database query to remove user
     })
 }
 
-function addSongToQueue(sessionId, song){
+function addSongToQueue(sessionId, song) {
     return new Promise((resolve, reject) => {
         //TODO database query to add to queue
     })
 }
 
-function deleteSongFromQueue(sessionId, song){
+function deleteSongFromQueue(sessionId, song) {
     return new Promise((resolve, reject) => {
         //TODO database query to delete from queue
     })
 }
 
-function addVoteToSong(sessionId, song){
+function addVoteToSong(sessionId, song) {
     return new Promise((resolve, reject) => {
         //TODO database query to delete from queue
     })
 }
-
 
 
 module.exports = {
     createSession,
     removeSession,
-    sessionExists,
+    getSession,
+    getSessions,
 };

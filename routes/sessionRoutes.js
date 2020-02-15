@@ -1,32 +1,49 @@
 const express = require('express');
 const sessions = require('../firebase/sessions');
 const router = express.Router();
+const Boom = require('@hapi/boom');
 
-router.get('/', (request, response) => {
-    response.send("Here are the sessions you asked for")
+// ALL GET ROUTES
+router.get('/', async (request, response) => {
+    try {
+        const returnedSessions = await sessions.getSessions();
+        response.send(returnedSessions)
+    }catch (e) {
+        response.send(e)
+    }
+});
+router.get('/:sessionId', async (request, response) => {
+    try {
+        const returnedSession = await sessions.getSession(request.params.sessionId);
+        response.send(returnedSession)
+    }catch (e) {
+        response.send(e)
+    }
 });
 
+// ALL POST ROUTES
 router.post('/', async (request, response) => {
-   //TODO call logic to determine if everything is formatted properly
     const userId = request.body.userId;
     const songQueue = request.body.songQueue;
     try{
         const success = await sessions.createSession(userId, songQueue);
-        response.json({message: success});
+        response.send({message: success});
     }catch (e) {
-        response.json({message: e})
+        response.send(e)
     }
 });
 
+// ALL DELETE ROUTES
 router.delete('/', async (request, response) => {
-    //TODO make logic to determine if real userID
     const userId = request.body.userId;
     try{
         const success = await sessions.removeSession(userId);
-        response.json({message: success})
+        response.send({message: success})
     }catch (e) {
-        response.json({message: e})
+        response.send(e)
     }
 });
+
+// ALL PATCH ROUTES
 
 module.exports = router;
