@@ -3,6 +3,9 @@ const sessions = require('../firebase/sessions');
 const router = express.Router();
 const Boom = require('@hapi/boom');
 
+//TODO create models to compare request data with, before making calls to sessions
+//TODO rethink route names/parameters
+
 // ALL GET ROUTES
 router.get('/', async (request, response) => {
     try {
@@ -23,7 +26,6 @@ router.get('/:sessionId', async (request, response) => {
 
 // ALL POST ROUTES
 router.post('/', async (request, response) => {
-    //TODO add logic to make sure these are what they should be / Model. foreach route
     const userId = request.body.userId;
     const songQueue = request.body.songQueue;
     try{
@@ -71,6 +73,26 @@ router.patch('/:sessionId/:userId', async (request, response) => {
     const userId = request.params.userId;
     try{
         const success = await sessions.addUserToSession(sessionId, userId);
+        response.send(success)
+    }catch (e) {
+        response.send(e)
+    }
+});
+router.patch('/:sessionId/songs/votes', async (request, response) => {
+    const sessionId = request.params.sessionId;
+    const songURI = request.body.song.uri;
+    try{
+        const success = await sessions.addVoteToSong(sessionId, songURI);
+        response.send(success)
+    }catch (e) {
+        response.send(e)
+    }
+});
+router.patch('/:sessionId/songs/add', async (request, response) => {
+    const sessionId = request.params.sessionId;
+    const song = request.body.song;
+    try{
+        const success = await sessions.addSongToQueue(sessionId, song);
         response.send(success)
     }catch (e) {
         response.send(e)

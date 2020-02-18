@@ -1,6 +1,11 @@
 const db = require('./firebaseDatabase').db;
 const Boom = require('@hapi/boom');
 
+//TODO check when adding song, if song uri exists already. if so, add vote.
+//TODO add logic for each call to check if snapshot value exists, since it will not error out otherwise
+//TODO cleanup and order
+//TODO move all error messages to a config file, and try to consolidate them better
+
 function createSession(userId, songQueue) {
     return new Promise((resolve, reject) => {
         const sessionId = `session_${userId}`;
@@ -100,11 +105,11 @@ function addSongToQueue(sessionId, song) {
                 if (error) {
                     return reject(Boom.boomify(error, {message: "A problem occured when adding a song to the queue"}))
                 } else {
-                    return resolve(`successfully added ${song} to the queue`)
+                    return resolve(`successfully added ${song.title} to the queue`)
                 }
             })
         }).catch((error) => {
-            return reject(Boom.boomify(error, {message: "A problem occured when adding a song to the queue"}));
+            return reject(Boom.boomify(error));
         });
     })
 }
@@ -146,9 +151,24 @@ function deleteSongFromQueue(sessionId, songURI) {
 })
 }
 
-function addVoteToSong(sessionId, song) {
+function addVoteToSong(sessionId, songURI) {
     return new Promise((resolve, reject) => {
-        //TODO database query to delete from queue
+        getSession(sessionId).then(() => {
+            db.ref(`active_sessions/${sessionId}/songQueue/${songURI}`).once('value', (snapshot) => {
+                if (snapshot.val()){
+                    const newVotes = snapshot.val().votes + 1 || 1;
+                    db.ref(`active_sessions/${sessionId}/songQueue/${songURI}`).child("votes").set(newVotes, (error) => {
+                        if (error){
+                            return reject(Boom.badGateway("An error occurred when trying to add a vote to a song"))
+                        }
+                        else return resolve(`Successfully added a vote to ${songURI}`)
+                    })
+                }
+                else return reject(Boom.notFound("Cannot add vote, song not found in queue"))
+            });
+        }).catch((error) => {
+            return reject(Boom.boomify(error, {message: "An error occurred when adding a vote to a song"}));
+        });
     })
 }
 
