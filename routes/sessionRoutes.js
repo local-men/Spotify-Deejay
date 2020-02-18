@@ -23,6 +23,7 @@ router.get('/:sessionId', async (request, response) => {
 
 // ALL POST ROUTES
 router.post('/', async (request, response) => {
+    //TODO add logic to make sure these are what they should be / Model. foreach route
     const userId = request.body.userId;
     const songQueue = request.body.songQueue;
     try{
@@ -43,6 +44,16 @@ router.delete('/:sessionId', async (request, response) => {
         response.send(e)
     }
 });
+router.delete('/:sessionId/songs/:songURI', async (request, response) => {
+    const sessionId = request.params.sessionId;
+    const songURI = request.params.songURI;
+    try{
+        const success = await sessions.deleteSongFromQueue(sessionId, songURI);
+        response.send(success)
+    }catch (e) {
+        response.send(e)
+    }
+});
 router.delete('/:sessionId/:userId', async (request, response) => {
     const sessionId = request.params.sessionId;
     const userId = request.params.userId;
@@ -55,5 +66,14 @@ router.delete('/:sessionId/:userId', async (request, response) => {
 });
 
 // ALL PATCH ROUTES
-
+router.patch('/:sessionId/:userId', async (request, response) => {
+    const sessionId = request.params.sessionId;
+    const userId = request.params.userId;
+    try{
+        const success = await sessions.addUserToSession(sessionId, userId);
+        response.send(success)
+    }catch (e) {
+        response.send(e)
+    }
+});
 module.exports = router;
