@@ -1,3 +1,4 @@
 const firebase = require('./firebase/firebaseDatabase');
-const router = require('./routesIndex');
+const server = require('./server');
+require('./routesIndex')(server);
 

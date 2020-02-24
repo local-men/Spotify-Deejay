@@ -1,7 +1,6 @@
 const express = require('express');
 const sessions = require('../firebase/sessions');
 const router = express.Router();
-const Boom = require('@hapi/boom');
 
 //TODO create models to compare request data with, before making calls to sessions
 //TODO rethink route names/parameters
@@ -20,6 +19,22 @@ router.get('/:sessionId', async (request, response) => {
         const returnedSession = await sessions.getSession(request.params.sessionId);
         response.send(returnedSession)
     }catch (e) {
+        response.send(e)
+    }
+});
+router.get('/:sessionId/songs', async(request, response) => {
+    try {
+        const success = await sessions.getSessionSongs(request.params.sessionId);
+        response.send(success);
+    } catch (e){
+        response.send(e)
+    }
+});
+router.get('/:sessionId/users', async(request, response) => {
+    try {
+        const success = await sessions.getUsersFromSession(request.params.sessionId);
+        response.send(success);
+    } catch (e){
         response.send(e)
     }
 });

@@ -59,6 +59,35 @@ function getSession(sessionId) {
     })
 }
 
+function getSessionSongs(sessionId){
+    return new Promise((resolve, reject) => {
+        getSession(sessionId).then(() => {
+            db.ref(`active_sessions/${sessionId}/songQueue`).once( 'value', (snapshot) => {
+                if (snapshot.val()){
+                    return resolve(snapshot.val());}
+                else {
+                    return resolve("The song queue is empty")}
+            }).catch((error) => {
+                return reject(Boom.boomify(error, {statusCode: 500, message: `A problem occurred when getting the songs for ${sessionId}`}))
+            })
+        })
+    })
+}
+function getUsersFromSession(sessionId){
+    return new Promise((resolve, reject) => {
+        getSession(sessionId).then(() => {
+            db.ref(`active_sessions/${sessionId}/users`).once( 'value', (snapshot) => {
+                if (snapshot.val()){
+                    return resolve(snapshot.val());}
+                else {
+                    return resolve("The session has no users")}
+            }).catch((error) => {
+                return reject(Boom.boomify(error, {statusCode: 500, message: `A problem occurred when getting the users for ${sessionId}`}))
+            })
+        })
+    })
+}
+
 function deleteSession(sessionId) {
     return new Promise((resolve, reject) => {
         getSession(sessionId).then(() => {
@@ -182,5 +211,7 @@ module.exports = {
     getSessions,
     addSongToQueue,
     addUserToSession,
-    addVoteToSong
+    addVoteToSong,
+    getSessionSongs,
+    getUsersFromSession,
 };
