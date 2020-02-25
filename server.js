@@ -14,7 +14,7 @@ const expressLogger = expressPino({ logger });
 app.use(expressLogger);
 
 app.use(bodyParser.json());
-app.use(cors()); // maked this api open!
+app.use(cors());
 
 app.listen(process.env.PORT || 3000, () => {
     logger.info('Server running on port %d', process.env.PORT || 3000);

@@ -94,7 +94,26 @@ $ bower install
 
 ## Features
 ## Usage (Optional)
-## Documentation (Optional)
+## Documentation 
+> To get started...
+- You will need to setup a .env file with these requirements
+```angular2
+# Database credentials
+API_KEY= ""
+AUTH_DOMAIN= ""
+DATABASE_URL= ""
+PROJECT_ID= ""
+STORAGE_BUCKET= ""
+MESSAGING_SENDER_ID= ""
+APP_ID= ""
+MEASUREMENT_ID= ""
+
+# server and logging
+NAME=""
+LOG_LEVEL=''
+PORT=
+
+```
 ## Tests (Optional)
 
 - Going into more detail on code and technologies used
