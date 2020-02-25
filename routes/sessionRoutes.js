@@ -4,9 +4,8 @@ const router = express.Router();
 const schemas = require('../schemas/schemas');
 const validator = require('express-joi-validation').createValidator({});
 
-//TODO create models to compare request data with, before making calls to sessions
 //TODO rethink route names/parameters
-
+//TODO add validator and schema for each route.
 // ALL GET ROUTES
 router.get('/', async (request, response) => {
     try {
@@ -87,7 +86,7 @@ router.delete('/:sessionId/:userId', async (request, response) => {
 // ALL PATCH ROUTES
 router.patch('/:sessionId/users/add', validator.body(schemas.userSchema), async (request, response) => {
     const sessionId = request.params.sessionId;
-    const userId = request.body.userId;
+    const userId = request.body.user.userId;
     try{
         const success = await sessions.addUserToSession(sessionId, userId);
         response.send(success)
@@ -105,7 +104,7 @@ router.patch('/:sessionId/songs/votes', async (request, response) => {
         response.send(e)
     }
 });
-router.patch('/:sessionId/songs/add', async (request, response) => {
+router.patch('/:sessionId/songs/add', validator.body(schemas.songSchema), async (request, response) => {
     const sessionId = request.params.sessionId;
     const song = request.body.song;
     try{

@@ -10,9 +10,15 @@ module.exports = {
         })
     }),
     userSchema: Joi.object({ // TODO decide what all gets stored for each user
-        userId: Joi.string().required(),
+        user: Joi.object({
+            userId: Joi.string().required(),
+        })
     }),
     songSchema: Joi.object({ //TODO decide what all get stored for each song
-
+        song: Joi.object({
+            uri: Joi.string().required(),
+            title: Joi.string().required(),
+            votes: Joi.number().required()
+        })
     })
 };
