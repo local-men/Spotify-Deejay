@@ -1,4 +1,4 @@
-const sessions = require('../firebase/sessions');
+const sessions = require('../controllers/sessionsController');
 const usersUtil = require('../utilities/usersUtil');
 const songQueueUtil = require("../utilities/songQueueUtil");
 

@@ -93,7 +93,22 @@ $ bower install
 ---
 
 ## Features
-## Usage (Optional)
+## Usage
+> Basic request format
+- To create a session
+a userId, and a song queue are required:
+songs require a uri, title, and vote count.
+```angular2
+{
+	"userId": "user_123dfdfee2dfg3sd423",
+	"songQueue": [
+		{"uri": "asdasdas", "title": "matt sings agian", "votes" : "0"},
+		{"uri": "1231231", "title": "mattjhjgs agian", "votes" : "0"},
+		{"uri": "asdassasdfsdfsdas", "title": "matsadfsdt sings agian", "votes" : "1"},
+		{"uri": "123345634561231", "title": "matt sings agian", "votes" : "2"}
+	]
+}
+```
 ## Documentation 
 > To get started...
 - You will need to setup a .env file with these requirements

@@ -1,6 +1,6 @@
 const db = require('../firebase/firebaseDatabase').db;
 
-const sessions = require('../firebase/sessions');
+const sessions = require('../controllers/sessionsController');
 const testUserId = "user_13241234";
 const testSongQueue = [
     {

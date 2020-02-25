@@ -1,4 +1,4 @@
-const db = require('./firebaseDatabase').db;
+const db = require('../firebase/firebaseDatabase').db;
 const Boom = require('@hapi/boom');
 
 //TODO check when adding song, if song uri exists already. if so, add vote.

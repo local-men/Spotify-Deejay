@@ -1,6 +1,8 @@
 const express = require('express');
-const sessions = require('../firebase/sessions');
+const sessions = require('../controllers/sessionsController');
 const router = express.Router();
+const schemas = require('../schemas/schemas');
+const validator = require('express-joi-validation').createValidator({});
 
 //TODO create models to compare request data with, before making calls to sessions
 //TODO rethink route names/parameters
@@ -40,7 +42,7 @@ router.get('/:sessionId/users', async(request, response) => {
 });
 
 // ALL POST ROUTES
-router.post('/', async (request, response) => {
+router.post('/', validator.body(schemas.sessionSchema), async (request, response) => {
     const userId = request.body.userId;
     const songQueue = request.body.songQueue;
     try{
@@ -83,9 +85,9 @@ router.delete('/:sessionId/:userId', async (request, response) => {
 });
 
 // ALL PATCH ROUTES
-router.patch('/:sessionId/:userId', async (request, response) => {
+router.patch('/:sessionId/users/add', validator.body(schemas.userSchema), async (request, response) => {
     const sessionId = request.params.sessionId;
-    const userId = request.params.userId;
+    const userId = request.body.userId;
     try{
         const success = await sessions.addUserToSession(sessionId, userId);
         response.send(success)
